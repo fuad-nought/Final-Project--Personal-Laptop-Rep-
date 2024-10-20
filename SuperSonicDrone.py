@@ -77,14 +77,10 @@ except Exception as e:
 def get_aircraft_length():
     while True:
         try:
-            user_input = input("Enter the length of the aircraft in foot (Range: 80 to 150 feet): ")
+            user_input = input("Enter the length of the aircraft in foot: ")
             # Try to convert the input to a float
             value = float(user_input)
-            # If the conversion succeeds, break out of the loop and return the value
-            if 80 <= value <= 150:
-                return value
-            else:
-                print("The length is out of range. Please enter a length between 80 feet to 150 feet.")
+            return value
         except ValueError:
             # If a ValueError occurs, print an error message and ask for value again
             print("Invalid input. Please enter a numeric value.")
@@ -96,9 +92,9 @@ L_Aircraft = get_aircraft_length()*10       #Length of the aircraft fuselage fro
 W_Aircraft = L_Aircraft*(3/10)              #Span of the aircraft fuselage between two engines
 L_Nacelle = L_Aircraft/2.4                  #Length of the nacelle including exhaust nozzle
 L_Spike = L_Nacelle/2                       #Length of the spiike from tip to root
-clearance = 5                               #Clearance Between Inlet Spike and Nacelle Body
-R_Nacelle = (L_Nacelle/20) + clearance      #Effective Radius of the Nacalle
 R_Spike = L_Spike/10                        #Maximum Radius of the spike
+clearance = R_Spike/5                       #Clearance Between Inlet Spike and Nacelle Body
+R_Nacelle = (L_Nacelle/20) + clearance      #Effective Radius of the Nacalle
 offset = (L_Spike/5)                        #Distance from spike tip to nacelle edge at inlet
 
 #'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -270,9 +266,9 @@ def nacelle_generator(offset_from_spike_tip, length_of_nacelle, radius_of_nacell
         p8 = create_construction_point(-(w+8.5*(L/10)), R*(2/3), 0)
         p9 = create_construction_point(-(w+9*(L/10)), R, 0)
         p10 = create_construction_point(-(w+10*(L/10)), R*(4/3), 0)
-        p11 = create_construction_point(-(w+L*3/25), (R+10), 0)
-        p12 = create_construction_point(-(w+L*(11/50)), (R+12), 0)
-        p13 = create_construction_point(-(w+L*(9/10)), (R+12), 0)
+        p11 = create_construction_point(-(w+L*3/25), (R*(4/3)), 0)
+        p12 = create_construction_point(-(w+L*(11/50)), (R*(7/5)), 0)
+        p13 = create_construction_point(-(w+L*(9/10)), (R*(7/5)), 0)
         #Construction Line
         Inner_Spline_1 = create_construction_spline(p1, p2, p3, p4, p5)
         Inner_Spline_2 = create_construction_spline(p5, p6, p7)
@@ -301,12 +297,12 @@ def nozzle_generator():
     try:
         #------Creating the sketch to make pockets--------
         p1 = create_construction_point(-(offset+9*(L_Nacelle/10)), 0, 0)
-        p2 = create_construction_point(-(offset+10.1*(L_Nacelle/10)), 0, 2)
-        p3 = create_construction_point(-(offset+10.1*(L_Nacelle/10)), 0, -2)
+        p2 = create_construction_point(-(offset+10.1*(L_Nacelle/10)), 0, R_Nacelle/15)
+        p3 = create_construction_point(-(offset+10.1*(L_Nacelle/10)), 0, -R_Nacelle/15)
         point_list = [p1, p2, p3]
         flaps_pocket_triangle =  create_closed_curve_with_polyline(point_list)
         #-----------Creating Pocket-----------
-        flaps_pocket = shpfac.add_new_pocket_from_ref(flaps_pocket_triangle, 200)
+        flaps_pocket = shpfac.add_new_pocket_from_ref(flaps_pocket_triangle, (R_Nacelle)*(20/3))
         document.part.update()
         #-------Adding Circular Pattern-------
         part.in_work_object = partbody
@@ -487,50 +483,85 @@ def fuselage_generator(aircraft_fuselage_length):
 #.....................................................................
 
 #_______________Generating Spike and support strut____________________
-part.in_work_object = partbody
-Inlet_Spike_Generator(L_Spike, R_Spike)
-strut_generator()
+try:
+    part.in_work_object = partbody
+    Inlet_Spike_Generator(L_Spike, R_Spike)
+    strut_generator()
+except Exception as e:
+        print(f"An exception occured{e}")
 
 #______________________Generating Nacelle Body________________________
 
 #------------Creating 2D profile-------------
-nacelle_2D_profile = nacelle_generator(offset, L_Nacelle, R_Nacelle)
+try:
+    nacelle_2D_profile = nacelle_generator(offset, L_Nacelle, R_Nacelle)
+except Exception as e:
+        print(f"An exception occured{e}")
 #-------------Revolved sruface---------------
-nacelle_surface = create_surface_revolve(nacelle_2D_profile, 0, 360, x_dir)
+try:
+    nacelle_surface = create_surface_revolve(nacelle_2D_profile, 0, 360, x_dir)
+except Exception as e:
+        print(f"An exception occured{e}")
 #-----------------Making Solid---------------
-nacelle = shpfac.add_new_close_surface(nacelle_surface)
-document.part.update()
-
+try:
+    nacelle = shpfac.add_new_close_surface(nacelle_surface)
+    document.part.update()
+except Exception as e:
+        print(f"An exception occured{e}")
 #________________________Generating Nozzle____________________________
-nozzle_generator()
+try:
+    nozzle_generator()
+except Exception as e:
+        print(f"An exception occured{e}")
 
 #___________________Generating blow in doors__________________________
-blow_in_door_generator()
+try:
+    blow_in_door_generator()
+except Exception as e:
+        print(f"An exception occured{e}")
 
 #______________________Generating Rudder______________________________
-rudder_generator()
+try:
+    rudder_generator()
+except Exception as e:
+        print(f"An exception occured{e}")
 
 #________________________Generating Wing______________________________
-wing_generator()
+try:
+    wing_generator()
+except Exception as e:
+        print(f"An exception occured{e}")
 
 #_____________________Generating Fuselage_____________________________
-fuselage_generator(L_Aircraft)
+try:
+    fuselage_generator(L_Aircraft)
+except Exception as e:
+        print(f"An exception occured{e}")
 
 #________________Mirror to get the entire airplane____________________
-plane_to_mirror = hsf.add_new_plane_offset(plane_ZX, -(W_Aircraft/2), False)
-geometrical_set.append_hybrid_shape(plane_to_mirror)
-document.part.update()
+try:
+    plane_to_mirror = hsf.add_new_plane_offset(plane_ZX, -(W_Aircraft/2), False)
+    geometrical_set.append_hybrid_shape(plane_to_mirror)
+    document.part.update()
+except Exception as e:
+        print(f"An exception occured{e}")
 
-part.in_work_object = partbody
-shpfac.add_new_mirror(plane_to_mirror)
-document.part.update()
+try:
+    part.in_work_object = partbody
+    shpfac.add_new_mirror(plane_to_mirror)
+    document.part.update()
+except Exception as e:
+        print(f"An exception occured{e}")
 
 #________________Hiding the construction elements____________________
 selection.clear();
 selection.add(geometrical_set)
 selection.vis_properties.set_show(1) # 0: Show / 1: Hide
 selection.clear()
-document.part.update()
+try:
+    document.part.update()
+except Exception as e:
+    print(f"An exception occured{e}")
 
 #------------------------------------------------------------------------------------------------------------------------
 #--------------------------------------------------END of CODE-----------------------------------------------------------
