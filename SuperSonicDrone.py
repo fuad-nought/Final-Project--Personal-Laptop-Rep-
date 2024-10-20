@@ -397,7 +397,7 @@ def rudder_generator():
         print(f"An exception occured{e}")
 
 #'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-#-------------Fucntion to create wing aer0foil profile----------------
+#-------------Fucntion to create wing aerofoil profile----------------
 #.....................................................................
 def wing_airfoil_generator(leading_edge, top_mid_point, bottom_mid_point, trailing_edge):
     try:
@@ -417,7 +417,7 @@ def wing_generator():
         r1 = create_construction_point(-(offset+0.22*L_Nacelle), R_Nacelle*(4/3), 0)                    #leading edge
         r2 = create_construction_point(-(offset+0.54*L_Nacelle), R_Nacelle*(4/3), R_Nacelle*(7/30))     #top mid point
         r3 = create_construction_point(-(offset+0.9*L_Nacelle), R_Nacelle*(4/3), 0)                     #trailing edge
-        r4 = create_construction_point(-(offset+0.54*L_Nacelle), R_Nacelle*(4/3), -R_Nacelle*(2/15))    #bottom edge
+        r4 = create_construction_point(-(offset+0.54*L_Nacelle), R_Nacelle*(4/3), -R_Nacelle*(2/15))    #bottom mid point
         root_airfoil = wing_airfoil_generator(r1, r2, r4, r3)
 
         #Tip Airfoil
@@ -526,11 +526,11 @@ shpfac.add_new_mirror(plane_to_mirror)
 document.part.update()
 
 #________________Hiding the construction elements____________________
-# selection.clear();
-# selection.add(geometrical_set)
-# selection.vis_properties.set_show(1) # 0: Show / 1: Hide
-# selection.clear()
-# document.part.update()
+selection.clear();
+selection.add(geometrical_set)
+selection.vis_properties.set_show(1) # 0: Show / 1: Hide
+selection.clear()
+document.part.update()
 
 #------------------------------------------------------------------------------------------------------------------------
 #--------------------------------------------------END of CODE-----------------------------------------------------------
